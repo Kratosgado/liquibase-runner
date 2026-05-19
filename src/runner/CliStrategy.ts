@@ -9,6 +9,7 @@ const COMMAND_NAMES: Record<LiquibaseCommand, string> = {
 	validate: 'validate',
 	rollback: 'rollback',
 	generateChangelog: 'generate-changelog',
+	diffChangelog: 'diff-changelog',
 	diff: 'diff',
 };
 
@@ -18,33 +19,34 @@ export class CliStrategy implements IRunStrategy {
 		project: LiquibaseProject,
 		extraArgs?: Record<string, string>,
 	): string[] {
-		const args: string[] = [];
-
-		const changelogPath = path.isAbsolute(project.changelogFile)
-			? project.changelogFile
-			: path.join(project.rootPath, project.changelogFile);
-		args.push(`--changelog-file=${changelogPath}`);
-
-		const propsPath = path.isAbsolute(project.propertiesFile)
+		const args: string[] = [ COMMAND_NAMES[ command ] ];
+		const changelogPath = this.resolveChangelogPath( project, extraArgs );
+		const propsPath = path.isAbsolute( project.propertiesFile )
 			? project.propertiesFile
-			: path.join(project.rootPath, project.propertiesFile);
-		args.push(`--defaults-file=${propsPath}`);
+			: path.join( project.rootPath, project.propertiesFile );
+		args.unshift( `--defaults-file=${propsPath}` );
+		args.unshift( `--changelog-file=${changelogPath}` );
 
-		args.push(COMMAND_NAMES[command]);
-
-		if (extraArgs) {
-			for (const [key, value] of Object.entries(extraArgs)) {
-				args.push(`--${key}=${value}`);
+		if ( extraArgs ) {
+			for ( const [ key, value ] of Object.entries( extraArgs ) ) {
+				if ( key === 'changelogFile' ) continue;
+				args.push( `--${key}=${value}` );
 			}
 		}
 		return args;
 	}
 
-	getExecutable(_project: LiquibaseProject): string {
+	private resolveChangelogPath( project: LiquibaseProject, extraArgs?: Record<string, string> ): string {
+		if ( extraArgs?.changelogFile ) return extraArgs.changelogFile;
+		if ( path.isAbsolute( project.changelogFile ) ) return project.changelogFile;
+		return path.join( project.rootPath, project.changelogFile );
+	}
+
+	getExecutable( _project: LiquibaseProject ): string {
 		return getCliBinaryPath() || 'liquibase';
 	}
 
-	getCwd(project: LiquibaseProject): string {
+	getCwd( project: LiquibaseProject ): string {
 		return project.rootPath;
 	}
 }

@@ -6,7 +6,7 @@ A VS Code extension that provides a UI for managing [Liquibase](https://www.liqu
 
 - **Sidebar tree view** — detects Liquibase projects in your workspace and displays changelogs and changesets
 - **Run commands via right-click** — Update, Status, Validate, Rollback, Generate Changelog, Diff
-- **Live output panel** — streams command output in real time with an Output / Status / Diff tab layout
+- **Live dashboard panel** — streams command output in real time with Output / Status / Diff tabs and clearer command state
 - **Cancel in-flight commands** — abort long-running operations from the panel
 - **Auto-detects build tool** — Maven, Gradle, or standalone Liquibase CLI, with no manual configuration required
 - **File watching** — tree refreshes automatically when changelog files change on disk
@@ -50,7 +50,7 @@ All commands are available from the command palette (`Ctrl+Shift+P`) and the tre
 | `Liquibase: Status` | Show pending changesets |
 | `Liquibase: Validate` | Validate the changelog for errors |
 | `Liquibase: Rollback` | Rollback by tag or count |
-| `Liquibase: Generate Changelog` | Generate a changelog from an existing database |
+| `Liquibase: Generate Changelog` | Generate a changelog from a database snapshot or Spring/Hibernate entities |
 | `Liquibase: Diff` | Compare two database schemas |
 | `Liquibase: Refresh` | Re-scan projects and changelogs |
 | `Liquibase: Open Output Panel` | Open the output panel |
@@ -58,7 +58,8 @@ All commands are available from the command palette (`Ctrl+Shift+P`) and the tre
 ## Known Issues
 
 - The `status` command output parser expects Liquibase's default format (`file::id::author` lines). Custom log formats may not populate the Status tab.
-- `generateChangelog` and `diff` require additional database connection properties to be set in `liquibase.properties`.
+- `generateChangelog` now prompts for an output file so it can write to a new changelog instead of the master file.
+- The entity-based generation flow uses Liquibase `diffChangelog` with a Hibernate/Spring reference URL. It compares the entity model exposed through Hibernate to the database; it does not inspect JPA annotations directly.
 
 ## Release Notes
 

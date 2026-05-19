@@ -10,6 +10,7 @@ const COMMAND_MAP: Record<LiquibaseCommand, string> = {
 	validate: 'liquibase:validate',
 	rollback: 'liquibase:rollback',
 	generateChangelog: 'liquibase:generateChangelog',
+	diffChangelog: 'liquibase:diffChangelog',
 	diff: 'liquibase:diff',
 };
 
@@ -19,26 +20,30 @@ export class MavenStrategy implements IRunStrategy {
 		_project: LiquibaseProject,
 		extraArgs?: Record<string, string>,
 	): string[] {
-		const goal = COMMAND_MAP[command];
-		const args = [goal];
-		if (extraArgs) {
-			for (const [key, value] of Object.entries(extraArgs)) {
-				args.push(`-Dliquibase.${key}=${value}`);
+		const goal = COMMAND_MAP[ command ];
+		const args = [ goal ];
+		if ( extraArgs?.changelogFile ) {
+			args.push( `-Dliquibase.changelogFile=${extraArgs.changelogFile}` );
+		}
+		if ( extraArgs ) {
+			for ( const [ key, value ] of Object.entries( extraArgs ) ) {
+				if ( key === 'changelogFile' ) continue;
+				args.push( `-Dliquibase.${key}=${value}` );
 			}
 		}
 		return args;
 	}
 
-	getExecutable(project: LiquibaseProject): string {
+	getExecutable( project: LiquibaseProject ): string {
 		const configured = getMavenExecutable();
-		if (configured && configured !== 'mvn') return configured;
+		if ( configured && configured !== 'mvn' ) return configured;
 		// Prefer wrapper in the project root
-		const wrapper = path.join(project.rootPath, 'mvnw');
-		if (fs.existsSync(wrapper)) return './mvnw';
+		const wrapper = path.join( project.rootPath, 'mvnw' );
+		if ( fs.existsSync( wrapper ) ) return './mvnw';
 		return 'mvn';
 	}
 
-	getCwd(project: LiquibaseProject): string {
+	getCwd( project: LiquibaseProject ): string {
 		return project.rootPath;
 	}
 }
