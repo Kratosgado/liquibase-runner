@@ -51,7 +51,6 @@ export function createGenerateChangelogCommand(
         };
 
         let commandTitle = 'Generate Changelog';
-        let liquibaseCommand: 'generateChangelog' | 'diffChangelog' = 'generateChangelog';
 
         if ( mode.mode === 'entities' ) {
             const referenceUrl = await vscode.window.showInputBox( {
@@ -63,13 +62,12 @@ export function createGenerateChangelogCommand(
             if ( !referenceUrl ) return;
             extraArgs.referenceUrl = referenceUrl.trim();
             commandTitle = 'Generate Changelog from Entities';
-            liquibaseCommand = 'diffChangelog';
         }
 
         await runCommand( {
             project,
             commandTitle,
-            command: liquibaseCommand,
+            command: 'generateChangeLog',
             runner: runnerFactory( project ),
             webview,
             outputChannel,

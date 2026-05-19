@@ -9,8 +9,7 @@ const COMMAND_MAP: Record<LiquibaseCommand, string> = {
 	status: 'liquibase:status',
 	validate: 'liquibase:validate',
 	rollback: 'liquibase:rollback',
-	generateChangelog: 'liquibase:generateChangelog',
-	diffChangelog: 'liquibase:diffChangelog',
+	generateChangeLog: 'liquibase:generateChangeLog',
 	diff: 'liquibase:diff',
 };
 

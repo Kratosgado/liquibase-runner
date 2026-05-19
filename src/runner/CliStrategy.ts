@@ -8,8 +8,7 @@ const COMMAND_NAMES: Record<LiquibaseCommand, string> = {
 	status: 'status',
 	validate: 'validate',
 	rollback: 'rollback',
-	generateChangelog: 'generate-changelog',
-	diffChangelog: 'diff-changelog',
+	generateChangeLog: 'generate-changelog',
 	diff: 'diff',
 };
 

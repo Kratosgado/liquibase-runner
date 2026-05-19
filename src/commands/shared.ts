@@ -24,8 +24,10 @@ export function buildOnEvent(
 ): ( event: RunnerEvent ) => void {
 	return ( event: RunnerEvent ) => {
 		if ( event.type === 'stdout' || event.type === 'stderr' ) {
+			// mirror to webview and output channel, and also to host debug console with prefix
 			webview.postMessage( { type: event.type, data: event.data } );
 			outputChannel.append( event.data );
+			try { console.log( '[liquibase-runner]', event.type, event.data ); } catch ( e ) { /* ignore */ }
 		}
 	};
 }
@@ -47,6 +49,7 @@ export async function runCommand( opts: {
 	webview.show( `Liquibase: ${commandTitle}` );
 	webview.postMessage( { type: 'commandStart', command: commandTitle, project: project.name } );
 	outputChannel.appendLine( `\n[${commandTitle}] ${project.name} (${project.resolvedStrategy})` );
+	try { console.log( `[liquibase-runner] Starting ${commandTitle} for ${project.name} (${project.resolvedStrategy})` ); } catch ( e ) { }
 	outputChannel.show( true );
 
 	// Wire cancel button in webview to abort the runner
@@ -58,6 +61,7 @@ export async function runCommand( opts: {
 	try {
 		const result = await runner.run( command, project, extraArgs, onEvent );
 		webview.postMessage( { type: 'commandEnd', exitCode: result.exitCode, durationMs: result.durationMs } );
+		try { console.log( `[liquibase-runner] Finished ${commandTitle} exit=${result.exitCode} durationMs=${result.durationMs}` ); } catch ( e ) { }
 
 		if ( result.exitCode !== 0 ) {
 			vscode.window.showErrorMessage(

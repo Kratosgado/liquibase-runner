@@ -63,6 +63,16 @@
         "icon": "$(file-add)"
       },
       {
+        "command": "liquibaseRunner.configureProject",
+        "title": "Liquibase: Configure Project",
+        "icon": "$(gear)"
+      },
+      {
+        "command": "liquibaseRunner.commandBuilder",
+        "title": "Liquibase: Command Builder",
+        "icon": "$(tools)"
+      },
+      {
         "command": "liquibaseRunner.diff",
         "title": "Liquibase: Diff",
         "icon": "$(diff)"
@@ -139,14 +149,36 @@
         }
       ],
       "commandPalette": [
-        { "command": "liquibaseRunner.update" },
-        { "command": "liquibaseRunner.status" },
-        { "command": "liquibaseRunner.validate" },
-        { "command": "liquibaseRunner.rollback" },
-        { "command": "liquibaseRunner.generateChangelog" },
-        { "command": "liquibaseRunner.diff" },
-        { "command": "liquibaseRunner.refresh" },
-        { "command": "liquibaseRunner.openPanel" }
+        {
+          "command": "liquibaseRunner.update"
+        },
+        {
+          "command": "liquibaseRunner.status"
+        },
+        {
+          "command": "liquibaseRunner.validate"
+        },
+        {
+          "command": "liquibaseRunner.rollback"
+        },
+        {
+          "command": "liquibaseRunner.generateChangelog"
+        },
+        {
+          "command": "liquibaseRunner.configureProject"
+        },
+        {
+          "command": "liquibaseRunner.commandBuilder"
+        },
+        {
+          "command": "liquibaseRunner.diff"
+        },
+        {
+          "command": "liquibaseRunner.refresh"
+        },
+        {
+          "command": "liquibaseRunner.openPanel"
+        }
       ]
     },
     "configuration": {
@@ -154,7 +186,12 @@
       "properties": {
         "liquibaseRunner.executionStrategy": {
           "type": "string",
-          "enum": ["auto", "maven", "gradle", "cli"],
+          "enum": [
+            "auto",
+            "maven",
+            "gradle",
+            "cli"
+          ],
           "default": "auto",
           "description": "How to invoke Liquibase. 'auto' detects Maven/Gradle from project files."
         },

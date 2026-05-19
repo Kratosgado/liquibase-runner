@@ -30,8 +30,7 @@ export type LiquibaseCommand =
 	| 'status'
 	| 'validate'
 	| 'rollback'
-	| 'generateChangelog'
-	| 'diffChangelog'
+	| 'generateChangeLog'
 	| 'diff';
 
 export interface RunnerEvent {
@@ -60,7 +59,13 @@ export type WebviewMessage =
 	| { type: 'commandEnd'; exitCode: number; durationMs: number }
 	| { type: 'showStatus'; pending: Changeset[] }
 	| { type: 'showDiff'; content: string }
-	| { type: 'cancelCommand' };
+	| { type: 'cancelCommand' }
+	| { type: 'openConfigure' }
+	| { type: 'webviewRunCommand'; command: LiquibaseCommand; projectRoot?: string; extraArgs?: Record<string, string> }
+	| { type: 'savePresets'; presets: Record<string, unknown> }
+	| { type: 'presets'; presets: Record<string, unknown> }
+	| { type: 'requestProjects' }
+	| { type: 'projects'; projects: { name: string; rootPath: string }[] };
 
 export interface LiquibaseNode extends vscode.TreeItem {
 	kind: NodeKind;

@@ -59,7 +59,7 @@ All commands are available from the command palette (`Ctrl+Shift+P`) and the tre
 
 - The `status` command output parser expects Liquibase's default format (`file::id::author` lines). Custom log formats may not populate the Status tab.
 - `generateChangelog` now prompts for an output file so it can write to a new changelog instead of the master file.
-- The entity-based generation flow uses Liquibase `diffChangelog` with a Hibernate/Spring reference URL. It compares the entity model exposed through Hibernate to the database; it does not inspect JPA annotations directly.
+- The entity-based generation flow uses Liquibase's generation/diff functionality with a Hibernate/Spring reference URL. It compares the entity model exposed through Hibernate to the database; it does not inspect JPA annotations directly.
 
 ## Release Notes
 
