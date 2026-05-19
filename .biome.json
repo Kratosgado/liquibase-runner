@@ -1,0 +1,15 @@
+{
+  "files": ["src/**/*.ts"],
+  "formatter": {
+    "enabled": true
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "curly": "warn",
+      "eqeqeq": "warn",
+      "no-throw-literal": "warn",
+      "semi": "warn"
+    }
+  }
+}

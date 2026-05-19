@@ -30,15 +30,14 @@
     "watch-tests": "tsc -p . -w --outDir out",
     "pretest": "pnpm run compile-tests && pnpm run compile && pnpm run lint",
     "check-types": "tsc --noEmit",
-    "lint": "eslint src",
+    "lint": "biome check src",
     "test": "vscode-test"
   },
   "devDependencies": {
     "@types/vscode": "^1.120.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "22.x",
-    "typescript-eslint": "^8.56.1",
-    "eslint": "^9.39.3",
+    "biome": "latest",
     "esbuild": "^0.27.3",
     "npm-run-all": "^4.1.5",
     "typescript": "^5.9.3",
