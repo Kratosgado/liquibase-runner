@@ -1,23 +1,195 @@
 {
   "name": "liquibase-runner",
-  "displayName": "liquibase-runner",
+  "displayName": "Liquibase Runner",
   "description": "Run liquibase commands easily with UI",
   "version": "0.0.1",
+  "icon": "resources/liquibase.png",
   "engines": {
     "vscode": "^1.120.0"
   },
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "workspaceContains:**/liquibase.properties",
+    "workspaceContains:**/db.changelog-master.yaml",
+    "workspaceContains:**/db.changelog-master.xml"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "liquibaseRunner",
+          "title": "Liquibase",
+          "icon": "resources/liquibase.svg"
+        }
+      ]
+    },
+    "views": {
+      "liquibaseRunner": [
+        {
+          "id": "liquibaseRunner.projectsView",
+          "name": "Projects",
+          "icon": "resources/liquibase.svg",
+          "contextualTitle": "Liquibase Runner"
+        }
+      ]
+    },
     "commands": [
       {
-        "command": "liquibase-runner.helloWorld",
-        "title": "Hello World"
+        "command": "liquibaseRunner.update",
+        "title": "Liquibase: Update",
+        "icon": "$(run)"
+      },
+      {
+        "command": "liquibaseRunner.status",
+        "title": "Liquibase: Status",
+        "icon": "$(info)"
+      },
+      {
+        "command": "liquibaseRunner.validate",
+        "title": "Liquibase: Validate",
+        "icon": "$(check)"
+      },
+      {
+        "command": "liquibaseRunner.rollback",
+        "title": "Liquibase: Rollback",
+        "icon": "$(discard)"
+      },
+      {
+        "command": "liquibaseRunner.generateChangelog",
+        "title": "Liquibase: Generate Changelog",
+        "icon": "$(file-add)"
+      },
+      {
+        "command": "liquibaseRunner.diff",
+        "title": "Liquibase: Diff",
+        "icon": "$(diff)"
+      },
+      {
+        "command": "liquibaseRunner.refresh",
+        "title": "Liquibase: Refresh",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "liquibaseRunner.openPanel",
+        "title": "Liquibase: Open Output Panel",
+        "icon": "$(open-preview)"
+      },
+      {
+        "command": "liquibaseRunner.openChangeset",
+        "title": "Open File",
+        "icon": "$(go-to-file)"
       }
-    ]
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "liquibaseRunner.refresh",
+          "when": "view == liquibaseRunner.projectsView",
+          "group": "navigation"
+        },
+        {
+          "command": "liquibaseRunner.openPanel",
+          "when": "view == liquibaseRunner.projectsView",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "liquibaseRunner.update",
+          "when": "view == liquibaseRunner.projectsView && viewItem == project",
+          "group": "1_run@1"
+        },
+        {
+          "command": "liquibaseRunner.status",
+          "when": "view == liquibaseRunner.projectsView && viewItem == project",
+          "group": "1_run@2"
+        },
+        {
+          "command": "liquibaseRunner.validate",
+          "when": "view == liquibaseRunner.projectsView && viewItem == project",
+          "group": "1_run@3"
+        },
+        {
+          "command": "liquibaseRunner.rollback",
+          "when": "view == liquibaseRunner.projectsView && viewItem == project",
+          "group": "1_run@4"
+        },
+        {
+          "command": "liquibaseRunner.diff",
+          "when": "view == liquibaseRunner.projectsView && viewItem == project",
+          "group": "1_run@5"
+        },
+        {
+          "command": "liquibaseRunner.generateChangelog",
+          "when": "view == liquibaseRunner.projectsView && viewItem == project",
+          "group": "2_generate@1"
+        },
+        {
+          "command": "liquibaseRunner.update",
+          "when": "view == liquibaseRunner.projectsView && viewItem == changelogFile",
+          "group": "inline"
+        },
+        {
+          "command": "liquibaseRunner.openChangeset",
+          "when": "view == liquibaseRunner.projectsView && viewItem == changeset",
+          "group": "inline"
+        }
+      ],
+      "commandPalette": [
+        { "command": "liquibaseRunner.update" },
+        { "command": "liquibaseRunner.status" },
+        { "command": "liquibaseRunner.validate" },
+        { "command": "liquibaseRunner.rollback" },
+        { "command": "liquibaseRunner.generateChangelog" },
+        { "command": "liquibaseRunner.diff" },
+        { "command": "liquibaseRunner.refresh" },
+        { "command": "liquibaseRunner.openPanel" }
+      ]
+    },
+    "configuration": {
+      "title": "Liquibase Runner",
+      "properties": {
+        "liquibaseRunner.executionStrategy": {
+          "type": "string",
+          "enum": ["auto", "maven", "gradle", "cli"],
+          "default": "auto",
+          "description": "How to invoke Liquibase. 'auto' detects Maven/Gradle from project files."
+        },
+        "liquibaseRunner.mavenExecutable": {
+          "type": "string",
+          "default": "mvn",
+          "description": "Path to the Maven executable (e.g., /usr/local/bin/mvn or mvnw)."
+        },
+        "liquibaseRunner.gradleExecutable": {
+          "type": "string",
+          "default": "",
+          "description": "Path to Gradle wrapper or binary. Defaults to ./gradlew (Unix) or gradlew.bat (Windows)."
+        },
+        "liquibaseRunner.cliBinaryPath": {
+          "type": "string",
+          "default": "liquibase",
+          "description": "Path to the Liquibase CLI binary when using the 'cli' strategy."
+        },
+        "liquibaseRunner.defaultRollbackTag": {
+          "type": "string",
+          "default": "",
+          "description": "Pre-fill rollback tag in the rollback prompt."
+        },
+        "liquibaseRunner.diffReferenceUrl": {
+          "type": "string",
+          "default": "",
+          "description": "Reference database URL for the diff command."
+        },
+        "liquibaseRunner.projectOverrides": {
+          "type": "object",
+          "default": {},
+          "description": "Per-project overrides keyed by absolute workspace folder path."
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "pnpm run package",

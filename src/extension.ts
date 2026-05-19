@@ -1,26 +1,52 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import { detectProjects } from './config/projectDetector.js';
+import { onConfigurationChange } from './config/configManager.js';
+import { ChangelogParser } from './changelog/ChangelogParser.js';
+import { ChangelogWatcher } from './changelog/ChangelogWatcher.js';
+import { LiquibaseTreeProvider } from './tree/LiquibaseTreeProvider.js';
+import { WebviewPanelManager } from './webview/WebviewPanelManager.js';
+import { createRunnerFactory } from './runner/CommandRunner.js';
+import { registerCommands } from './commands/registerCommands.js';
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext): Promise<void> {
+	const outputChannel = vscode.window.createOutputChannel('Liquibase Runner');
+	context.subscriptions.push(outputChannel);
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "liquibase-runner" is now active!');
+	const parser = new ChangelogParser();
+	const webviewManager = new WebviewPanelManager(context);
+	context.subscriptions.push(webviewManager);
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('liquibase-runner.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from liquibase-runner!');
+	let projects = await detectProjects(vscode.workspace.workspaceFolders ?? []);
+
+	const treeProvider = new LiquibaseTreeProvider(projects, parser);
+	context.subscriptions.push(treeProvider);
+
+	const watchers = projects.map(
+		p => new ChangelogWatcher(p, () => treeProvider.refresh()),
+	);
+	context.subscriptions.push(...watchers);
+
+	const treeView = vscode.window.createTreeView('liquibaseRunner.projectsView', {
+		treeDataProvider: treeProvider,
+		showCollapseAll: true,
 	});
+	context.subscriptions.push(treeView);
 
-	context.subscriptions.push(disposable);
+	const runnerFactory = createRunnerFactory();
+
+	registerCommands(context, projects, webviewManager, outputChannel, runnerFactory, treeProvider);
+
+	// Re-detect projects when workspace folders or configuration changes
+	const refreshProjects = async () => {
+		projects = await detectProjects(vscode.workspace.workspaceFolders ?? []);
+		treeProvider.updateProjects(projects);
+	};
+
+	context.subscriptions.push(
+		vscode.workspace.onDidChangeWorkspaceFolders(refreshProjects),
+	);
+
+	onConfigurationChange(refreshProjects, context.subscriptions);
 }
 
-// This method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate(): void {}
