@@ -52,21 +52,6 @@ export enum NodeKind {
 	Changeset = 'changeset',
 }
 
-export type WebviewMessage =
-	| { type: 'commandStart'; command: string; project: string }
-	| { type: 'stdout'; data: string }
-	| { type: 'stderr'; data: string }
-	| { type: 'commandEnd'; exitCode: number; durationMs: number }
-	| { type: 'showStatus'; pending: Changeset[] }
-	| { type: 'showDiff'; content: string }
-	| { type: 'cancelCommand' }
-	| { type: 'openConfigure' }
-	| { type: 'webviewRunCommand'; command: LiquibaseCommand; projectRoot?: string; extraArgs?: Record<string, string> }
-	| { type: 'savePresets'; presets: Record<string, unknown> }
-	| { type: 'presets'; presets: Record<string, unknown> }
-	| { type: 'requestProjects' }
-	| { type: 'projects'; projects: { name: string; rootPath: string }[] };
-
 export interface LiquibaseNode extends vscode.TreeItem {
 	kind: NodeKind;
 	project?: LiquibaseProject;

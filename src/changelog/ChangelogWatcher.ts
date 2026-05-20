@@ -11,29 +11,29 @@ export class ChangelogWatcher implements vscode.Disposable {
 		private readonly onChanged: () => void,
 	) {
 		const changelogDir = this.resolveChangelogDir();
-		if (changelogDir) {
-			const pattern = new vscode.RelativePattern(changelogDir, '**/*.{sql,xml,yaml,yml}');
-			this.watcher = vscode.workspace.createFileSystemWatcher(pattern);
-			this.watcher.onDidCreate(this.handleChange, this);
-			this.watcher.onDidChange(this.handleChange, this);
-			this.watcher.onDidDelete(this.handleChange, this);
+		if ( changelogDir ) {
+			const pattern = new vscode.RelativePattern( changelogDir, '**/*.{sql,xml,yaml,yml}' );
+			this.watcher = vscode.workspace.createFileSystemWatcher( pattern );
+			this.watcher.onDidCreate( this.handleChange, this );
+			this.watcher.onDidChange( this.handleChange, this );
+			this.watcher.onDidDelete( this.handleChange, this );
 		}
 	}
 
 	private resolveChangelogDir(): string {
-		const changelogFile = path.isAbsolute(this.project.changelogFile)
+		const changelogFile = path.isAbsolute( this.project.changelogFile )
 			? this.project.changelogFile
-			: path.join(this.project.rootPath, this.project.changelogFile);
-		return path.dirname(changelogFile);
+			: path.join( this.project.rootPath, this.project.changelogFile );
+		return path.dirname( changelogFile );
 	}
 
 	private handleChange(): void {
-		clearTimeout(this.debounceTimer);
-		this.debounceTimer = setTimeout(() => this.onChanged(), 300);
+		clearTimeout( this.debounceTimer );
+		this.debounceTimer = setTimeout( () => this.onChanged(), 300 );
 	}
 
 	dispose(): void {
-		clearTimeout(this.debounceTimer);
+		clearTimeout( this.debounceTimer );
 		this.watcher?.dispose();
 	}
 }

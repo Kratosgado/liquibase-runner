@@ -11,6 +11,19 @@
     "Other"
   ],
   "activationEvents": [
+    "onStartupFinished",
+    "onView:liquibaseRunner.projectsView",
+    "onCommand:liquibaseRunner.update",
+    "onCommand:liquibaseRunner.status",
+    "onCommand:liquibaseRunner.validate",
+    "onCommand:liquibaseRunner.rollback",
+    "onCommand:liquibaseRunner.generateChangelog",
+    "onCommand:liquibaseRunner.configureProject",
+    "onCommand:liquibaseRunner.commandBuilder",
+    "onCommand:liquibaseRunner.diff",
+    "onCommand:liquibaseRunner.refresh",
+    "onCommand:liquibaseRunner.openPanel",
+    "onCommand:liquibaseRunner.openChangeset",
     "workspaceContains:**/liquibase.properties",
     "workspaceContains:**/db.changelog-master.yaml",
     "workspaceContains:**/db.changelog-master.xml"

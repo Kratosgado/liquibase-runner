@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
-import type { LiquibaseCommand, LiquibaseProject, RunnerEvent } from '../types/index.js';
+import type { LiquibaseCommand, LiquibaseProject, RunnerEvent, CommandResult } from '../types/index.js';
 import type { CommandRunner } from '../runner/CommandRunner.js';
-import type { WebviewPanelManager } from '../webview/WebviewPanelManager.js';
+import type { OutputManager } from '../output/OutputManager.js';
 import type { LiquibaseTreeProvider } from '../tree/LiquibaseTreeProvider.js';
 
 export async function pickProject(
@@ -18,16 +18,10 @@ export async function pickProject(
 	return picked?.project;
 }
 
-export function buildOnEvent(
-	webview: WebviewPanelManager,
-	outputChannel: vscode.OutputChannel,
-): ( event: RunnerEvent ) => void {
+export function buildOnEvent( output: OutputManager ): ( event: RunnerEvent ) => void {
 	return ( event: RunnerEvent ) => {
 		if ( event.type === 'stdout' || event.type === 'stderr' ) {
-			// mirror to webview and output channel, and also to host debug console with prefix
-			webview.postMessage( { type: event.type, data: event.data } );
-			outputChannel.append( event.data );
-			try { console.log( '[liquibase-runner]', event.type, event.data ); } catch ( e ) { /* ignore */ }
+			output.appendOutput( event.data );
 		}
 	};
 }
@@ -37,31 +31,20 @@ export async function runCommand( opts: {
 	commandTitle: string;
 	command?: LiquibaseCommand;
 	runner: CommandRunner;
-	webview: WebviewPanelManager;
-	outputChannel: vscode.OutputChannel;
+	output: OutputManager;
 	treeProvider: LiquibaseTreeProvider;
 	extraArgs?: Record<string, string>;
 	refreshAfter?: boolean;
-} ): Promise<void> {
-	const { project, commandTitle, runner, webview, outputChannel, treeProvider, extraArgs, refreshAfter = true } = opts;
+} ): Promise<CommandResult | null> {
+	const { project, commandTitle, runner, output, treeProvider, extraArgs, refreshAfter = true } = opts;
 	const command = opts.command ?? commandTitle.toLowerCase().replace( /\s+/g, '' ) as LiquibaseCommand;
 
-	webview.show( `Liquibase: ${commandTitle}` );
-	webview.postMessage( { type: 'commandStart', command: commandTitle, project: project.name } );
-	outputChannel.appendLine( `\n[${commandTitle}] ${project.name} (${project.resolvedStrategy})` );
-	try { console.log( `[liquibase-runner] Starting ${commandTitle} for ${project.name} (${project.resolvedStrategy})` ); } catch ( e ) { }
-	outputChannel.show( true );
+	output.startCommand( commandTitle, project.name );
+	output.setCancelHandler( () => runner.cancel() );
 
-	// Wire cancel button in webview to abort the runner
-	const cancelDisposable = webview.onMessage( msg => {
-		if ( msg.type === 'cancelCommand' ) runner.cancel();
-	} );
-
-	const onEvent = buildOnEvent( webview, outputChannel );
 	try {
-		const result = await runner.run( command, project, extraArgs, onEvent );
-		webview.postMessage( { type: 'commandEnd', exitCode: result.exitCode, durationMs: result.durationMs } );
-		try { console.log( `[liquibase-runner] Finished ${commandTitle} exit=${result.exitCode} durationMs=${result.durationMs}` ); } catch ( e ) { }
+		const result = await runner.run( command, project, extraArgs, buildOnEvent( output ) );
+		output.endCommand( result.exitCode, result.durationMs );
 
 		if ( result.exitCode !== 0 ) {
 			vscode.window.showErrorMessage(
@@ -70,11 +53,13 @@ export async function runCommand( opts: {
 		} else if ( refreshAfter ) {
 			treeProvider.refresh();
 		}
+		return result;
 	} catch ( err ) {
 		const msg = err instanceof Error ? err.message : String( err );
-		webview.postMessage( { type: 'commandEnd', exitCode: -1, durationMs: 0 } );
+		output.endCommand( -1, 0 );
 		vscode.window.showErrorMessage( `Liquibase ${commandTitle} error: ${msg}` );
+		return null;
 	} finally {
-		cancelDisposable.dispose();
+		output.clearCancelHandler();
 	}
 }
