@@ -5,6 +5,7 @@ import type { IRunStrategy } from './IRunStrategy.js';
 
 const COMMAND_NAMES: Record<LiquibaseCommand, string> = {
 	update: 'update',
+	updateSql: 'update-sql',
 	status: 'status',
 	validate: 'validate',
 	rollback: 'rollback',
@@ -19,16 +20,23 @@ export class CliStrategy implements IRunStrategy {
 		extraArgs?: Record<string, string>,
 	): string[] {
 		const args: string[] = [ COMMAND_NAMES[ command ] ];
-		const changelogPath = this.resolveChangelogPath( project, extraArgs );
 		const propsPath = path.isAbsolute( project.propertiesFile )
 			? project.propertiesFile
 			: path.join( project.rootPath, project.propertiesFile );
+
+		if ( command === 'generateChangeLog' ) {
+			// --changelog-file is the OUTPUT destination for generate-changelog
+			if ( extraArgs?.outputChangeLogFile ) {
+				args.unshift( `--changelog-file=${extraArgs.outputChangeLogFile}` );
+			}
+		} else {
+			args.unshift( `--changelog-file=${this.resolveChangelogPath( project, extraArgs )}` );
+		}
 		args.unshift( `--defaults-file=${propsPath}` );
-		args.unshift( `--changelog-file=${changelogPath}` );
 
 		if ( extraArgs ) {
 			for ( const [ key, value ] of Object.entries( extraArgs ) ) {
-				if ( key === 'changelogFile' ) continue;
+				if ( key === 'changelogFile' || key === 'outputChangeLogFile' ) continue;
 				args.push( `--${key}=${value}` );
 			}
 		}

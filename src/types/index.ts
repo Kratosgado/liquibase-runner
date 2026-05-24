@@ -25,8 +25,15 @@ export interface ChangelogFile {
 	changesets: Changeset[];
 }
 
+export interface DatabaseConnection {
+	name: string;
+	url: string;
+	username: string;
+}
+
 export type LiquibaseCommand =
 	| 'update'
+	| 'updateSql'
 	| 'status'
 	| 'validate'
 	| 'rollback'
@@ -34,7 +41,7 @@ export type LiquibaseCommand =
 	| 'diff';
 
 export interface RunnerEvent {
-	type: 'stdout' | 'stderr' | 'exit' | 'error';
+	type: 'stdout' | 'stderr' | 'exit' | 'error' | 'command';
 	data: string;
 }
 
@@ -50,6 +57,15 @@ export enum NodeKind {
 	MigrationsFolder = 'migrationsFolder',
 	ChangelogFile = 'changelogFile',
 	Changeset = 'changeset',
+}
+
+export interface ProjectCommandConfig {
+	referenceUrl?: string;
+	rollbackTag?: string;
+	generateChangelogDir?: string;
+	contexts?: string;
+	labels?: string;
+	logLevel?: string;
 }
 
 export interface LiquibaseNode extends vscode.TreeItem {

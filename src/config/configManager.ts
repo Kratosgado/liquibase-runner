@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import type { ExecutionStrategy, LiquibaseProject } from '../types/index.js';
+import type { ExecutionStrategy, LiquibaseProject, ProjectCommandConfig } from '../types/index.js';
 
 const SECTION = 'liquibaseRunner';
 
@@ -30,6 +30,18 @@ export function getDiffReferenceUrl(): string {
 export function getProjectOverrides(projectRoot: string): Partial<LiquibaseProject> {
 	const overrides = vscode.workspace.getConfiguration(SECTION).get<Record<string, Partial<LiquibaseProject>>>('projectOverrides', {});
 	return overrides[projectRoot] ?? {};
+}
+
+export function getProjectCommandConfig( projectRoot: string ): ProjectCommandConfig {
+	const all = vscode.workspace.getConfiguration( SECTION ).get<Record<string, ProjectCommandConfig>>( 'projectCommandConfigs' ) ?? {};
+	return all[ projectRoot ] ?? {};
+}
+
+export async function saveProjectCommandConfig( projectRoot: string, updates: Partial<ProjectCommandConfig> ): Promise<void> {
+	const cfg = vscode.workspace.getConfiguration( SECTION );
+	const all = cfg.get<Record<string, ProjectCommandConfig>>( 'projectCommandConfigs' ) ?? {};
+	all[ projectRoot ] = { ...( all[ projectRoot ] ?? {} ), ...updates };
+	await cfg.update( 'projectCommandConfigs', all, vscode.ConfigurationTarget.Workspace );
 }
 
 export function onConfigurationChange(handler: () => void, disposables: vscode.Disposable[]): void {

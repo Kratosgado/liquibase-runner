@@ -6,6 +6,7 @@ import type { IRunStrategy } from './IRunStrategy.js';
 
 const COMMAND_MAP: Record<LiquibaseCommand, string> = {
 	update: 'liquibase:update',
+	updateSql: 'liquibase:updateSQL',
 	status: 'liquibase:status',
 	validate: 'liquibase:validate',
 	rollback: 'liquibase:rollback',

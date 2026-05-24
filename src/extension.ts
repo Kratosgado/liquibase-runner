@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { detectProjects } from './config/projectDetector.js';
 import { onConfigurationChange } from './config/configManager.js';
+import { ConnectionManager } from './config/ConnectionManager.js';
 import { ChangelogParser } from './changelog/ChangelogParser.js';
 import { ChangelogWatcher } from './changelog/ChangelogWatcher.js';
 import { LiquibaseTreeProvider } from './tree/LiquibaseTreeProvider.js';
@@ -11,6 +12,8 @@ import { registerCommands } from './commands/registerCommands.js';
 export async function activate( context: vscode.ExtensionContext ): Promise<void> {
 	const output = new OutputManager( context );
 	context.subscriptions.push( output );
+
+	const connManager = new ConnectionManager( context.secrets );
 
 	const parser = new ChangelogParser();
 
@@ -28,11 +31,12 @@ export async function activate( context: vscode.ExtensionContext ): Promise<void
 		treeDataProvider: treeProvider,
 		showCollapseAll: true,
 	} );
+
 	context.subscriptions.push( treeView );
 
 	const runnerFactory = createRunnerFactory();
 
-	registerCommands( context, projects, output, runnerFactory, treeProvider );
+	registerCommands( context, projects, output, runnerFactory, treeProvider, connManager );
 
 	const refreshProjects = async () => {
 		projects = await detectProjects( vscode.workspace.workspaceFolders ?? [] );

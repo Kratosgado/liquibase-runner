@@ -20,7 +20,9 @@ export async function pickProject(
 
 export function buildOnEvent( output: OutputManager ): ( event: RunnerEvent ) => void {
 	return ( event: RunnerEvent ) => {
-		if ( event.type === 'stdout' || event.type === 'stderr' ) {
+		if ( event.type === 'command' ) {
+			output.appendOutput( `$ ${event.data}\n\n` );
+		} else if ( event.type === 'stdout' || event.type === 'stderr' ) {
 			output.appendOutput( event.data );
 		}
 	};

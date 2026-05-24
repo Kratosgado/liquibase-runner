@@ -6,6 +6,7 @@ import type { IRunStrategy } from './IRunStrategy.js';
 
 const COMMAND_MAP: Record<LiquibaseCommand, string> = {
 	update: 'liquibaseUpdate',
+	updateSql: 'liquibaseUpdateSQL',
 	status: 'liquibaseStatus',
 	validate: 'liquibaseValidate',
 	rollback: 'liquibaseRollback',
@@ -24,9 +25,12 @@ export class GradleStrategy implements IRunStrategy {
 		if ( extraArgs?.changelogFile ) {
 			args.push( `-PliquibaseChangelogFile=${extraArgs.changelogFile}` );
 		}
+		if ( extraArgs?.outputChangeLogFile ) {
+			args.push( `-PliquibaseOutputChangeLogFile=${extraArgs.outputChangeLogFile}` );
+		}
 		if ( extraArgs ) {
 			for ( const [ key, value ] of Object.entries( extraArgs ) ) {
-				if ( key === 'changelogFile' ) continue;
+				if ( key === 'changelogFile' || key === 'outputChangeLogFile' ) continue;
 				args.push( `--${key}=${value}` );
 			}
 		}

@@ -2,6 +2,15 @@
   "name": "liquibase-runner",
   "displayName": "Liquibase Runner",
   "description": "Run liquibase commands easily with UI",
+  "publisher": "Kratosgado",
+  "repository": {
+    "url": "https://github.com/kratosgado/liquibase-runner"
+  },
+  "author": {
+    "email": "mbeahessilfieprince@gmail.com",
+    "name": "Kratosgado",
+    "url": "https://github.com/kratosgado"
+  },
   "version": "0.0.1",
   "icon": "resources/liquibase.png",
   "engines": {
@@ -237,6 +246,38 @@
           "type": "object",
           "default": {},
           "description": "Per-project overrides keyed by absolute workspace folder path."
+        },
+        "liquibaseRunner.projectCommandConfigs": {
+          "type": "object",
+          "default": {},
+          "description": "Per-project saved command inputs (referenceUrl, rollbackTag, generateChangelogDir) keyed by absolute project root path. Updated automatically when you run commands."
+        },
+        "liquibaseRunner.connections": {
+          "type": "array",
+          "default": [],
+          "description": "Saved database connections available across all projects. Passwords are stored separately in the system secret store.",
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "url",
+              "username"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Display name, e.g. auts_db@localhost"
+              },
+              "url": {
+                "type": "string",
+                "description": "JDBC URL, e.g. jdbc:postgresql://localhost:5432/mydb"
+              },
+              "username": {
+                "type": "string",
+                "description": "Database username"
+              }
+            }
+          }
         }
       }
     }

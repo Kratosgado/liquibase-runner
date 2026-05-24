@@ -1,69 +1,76 @@
-import * as path from 'node:path';
 import * as vscode from 'vscode';
 import type { LiquibaseProject } from '../types/index.js';
 import type { CommandRunner } from '../runner/CommandRunner.js';
 import type { OutputManager } from '../output/OutputManager.js';
 import type { LiquibaseTreeProvider } from '../tree/LiquibaseTreeProvider.js';
 import type { LiquibaseTreeNode } from '../tree/LiquibaseNode.js';
-import { getDiffReferenceUrl } from '../config/configManager.js';
+import type { ConnectionManager } from '../config/ConnectionManager.js';
+import { CommandFormPanel } from '../webview/CommandFormPanel.js';
+import { getProjectCommandConfig, saveProjectCommandConfig } from '../config/configManager.js';
 import { pickProject, runCommand } from './shared.js';
-
-type GenerationMode = 'database' | 'entities';
 
 export function createGenerateChangelogCommand(
 	projects: LiquibaseProject[],
 	output: OutputManager,
 	runnerFactory: ( p: LiquibaseProject ) => CommandRunner,
 	treeProvider: LiquibaseTreeProvider,
+	context: vscode.ExtensionContext,
+	connManager: ConnectionManager,
 ) {
 	return async ( node?: LiquibaseTreeNode ) => {
 		const project = node?.project ?? ( await pickProject( projects ) );
 		if ( !project ) return;
 
-		const mode = await vscode.window.showQuickPick(
-			[
-				{
-					label: 'From database schema',
-					description: 'Generate a changelog from the live database',
-					mode: 'database' as const,
-				},
-				{
-					label: 'From Spring JPA entities',
-					description: 'Use Hibernate/Spring entities as the reference model',
-					mode: 'entities' as const,
-				},
-			],
-			{ placeHolder: 'How should Liquibase generate the changelog?' },
-		);
-		if ( !mode ) return;
+		const saved = getProjectCommandConfig( project.rootPath );
 
-		const outputFile = await vscode.window.showInputBox( {
-			prompt: 'Output changelog file',
-			placeHolder: 'src/main/resources/db/changelog/migrations/2026-05-19-generated.yaml',
-			value: createDefaultOutputFile( project, mode.mode ),
-			validateInput: value => ( value.trim() ? null : 'Output file is required' ),
+		const form = await CommandFormPanel.show( {
+			context,
+			project,
+			connManager,
+			formType: 'generateChangelog',
+			savedValues: {
+				referenceUrl: saved.referenceUrl,
+				outputFile: saved.generateChangelogDir
+					? `${saved.generateChangelogDir}/generated.yaml`
+					: undefined,
+				contexts: saved.contexts,
+				labels: saved.labels,
+			},
 		} );
-		if ( !outputFile ) return;
+		if ( !form ) return;
 
-		const extraArgs: Record<string, string> = {
-			changelogFile: outputFile.trim(),
-		};
+		const extraArgs: Record<string, string> = {};
 
-		let commandTitle = 'Generate Changelog';
-
-		if ( mode.mode === 'entities' ) {
-			const referenceUrl = await vscode.window.showInputBox( {
-				prompt: 'Hibernate/Spring reference URL',
-				placeHolder: 'hibernate:spring:com.example.domain?dialect=org.hibernate.dialect.PostgreSQLDialect',
-				value: getDiffReferenceUrl(),
-				validateInput: value => ( value.trim() ? null : 'Reference URL is required' ),
-			} );
-			if ( !referenceUrl ) return;
-			extraArgs.referenceUrl = referenceUrl.trim();
-			commandTitle = 'Generate Changelog from Entities';
+		if ( form.outputFile ) {
+			// Maven needs outputChangeLogFile, Gradle/CLI strategies map it accordingly
+			extraArgs.outputChangeLogFile = form.outputFile;
+			const dir = form.outputFile.includes( '/' )
+				? form.outputFile.substring( 0, form.outputFile.lastIndexOf( '/' ) )
+				: '';
+			if ( dir ) await saveProjectCommandConfig( project.rootPath, { generateChangelogDir: dir } );
 		}
 
-		await runCommand( {
+		if ( form.contexts ) {
+			extraArgs.contexts = form.contexts;
+			await saveProjectCommandConfig( project.rootPath, { contexts: form.contexts } );
+		}
+		if ( form.labels ) {
+			extraArgs.labels = form.labels;
+			await saveProjectCommandConfig( project.rootPath, { labels: form.labels } );
+		}
+
+		if ( form.generationMode === 'entities' && form.referenceUrl ) {
+			extraArgs.referenceUrl = form.referenceUrl;
+			await saveProjectCommandConfig( project.rootPath, { referenceUrl: form.referenceUrl } );
+		} else if ( form.generationMode === 'database' && form.connectionName ) {
+			Object.assign( extraArgs, await connManager.getConnectionArgs( form.connectionName ) );
+		}
+
+		const commandTitle = form.generationMode === 'entities'
+			? 'Generate Changelog from Entities'
+			: 'Generate Changelog';
+
+		const result = await runCommand( {
 			project,
 			commandTitle,
 			command: 'generateChangeLog',
@@ -72,12 +79,14 @@ export function createGenerateChangelogCommand(
 			treeProvider,
 			extraArgs,
 		} );
-	};
-}
 
-function createDefaultOutputFile( project: LiquibaseProject, mode: GenerationMode ): string {
-	const timestamp = new Date().toISOString().replace( /[:.]/g, '-' ).slice( 0, 19 );
-	const baseDir = path.join( project.rootPath, 'src/main/resources/db/changelog/migrations' );
-	const fileName = mode === 'entities' ? `${timestamp}-entities.yaml` : `${timestamp}-generated.yaml`;
-	return path.join( baseDir, fileName );
+		if ( result?.exitCode === 0 && form.outputFile ) {
+			try {
+				const doc = await vscode.workspace.openTextDocument( vscode.Uri.file( form.outputFile ) );
+				await vscode.window.showTextDocument( doc, { preview: true, viewColumn: vscode.ViewColumn.Beside } );
+			} catch {
+				// output file may be relative or not yet flushed — ignore
+			}
+		}
+	};
 }

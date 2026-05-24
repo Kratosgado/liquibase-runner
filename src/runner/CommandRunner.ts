@@ -24,6 +24,8 @@ export class CommandRunner {
 		const cwd = this.strategy.getCwd(project);
 		const startTime = Date.now();
 
+		onEvent?.({ type: 'command', data: [executable, ...args].join(' ') });
+
 		return new Promise((resolve, reject) => {
 			const child = spawn(executable, args, {
 				cwd,
