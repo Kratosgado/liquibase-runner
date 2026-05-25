@@ -12,6 +12,13 @@ const COMMAND_MAP: Record<LiquibaseCommand, string> = {
 	rollback: 'liquibase:rollback',
 	generateChangeLog: 'liquibase:generateChangeLog',
 	diff: 'liquibase:diff',
+	diffChangelog: 'liquibase:diff',
+};
+
+// Liquibase 4.24+ renamed these parameters; use the new names for both old+new plugin versions.
+const MAVEN_KEY_MAP: Record<string, string> = {
+	labels: 'labelFilter',
+	contexts: 'contextFilter',
 };
 
 export class MavenStrategy implements IRunStrategy {
@@ -28,7 +35,8 @@ export class MavenStrategy implements IRunStrategy {
 		if ( extraArgs ) {
 			for ( const [ key, value ] of Object.entries( extraArgs ) ) {
 				if ( key === 'changelogFile' ) continue;
-				args.push( `-Dliquibase.${key}=${value}` );
+				const mappedKey = MAVEN_KEY_MAP[ key ] ?? key;
+				args.push( `-Dliquibase.${mappedKey}=${value}` );
 			}
 		}
 		return args;

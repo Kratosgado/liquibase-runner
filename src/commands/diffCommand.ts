@@ -42,18 +42,38 @@ export function createDiffCommand(
 			await saveProjectCommandConfig( project.rootPath, { referenceUrl: form.referenceUrl } );
 		}
 
-		const result = await runCommand( {
-			project,
-			commandTitle: 'Diff',
-			command: 'diff',
-			runner: runnerFactory( project ),
-			output,
-			treeProvider,
-			extraArgs,
-		} );
-
-		if ( result?.exitCode === 0 ) {
-			DiffPreviewPanel.show( context, result.stdout );
+		if ( form.outputFile ) {
+			extraArgs.diffChangeLogFile = form.outputFile;
+			const result = await runCommand( {
+				project,
+				commandTitle: 'Diff Changelog',
+				command: 'diffChangelog',
+				runner: runnerFactory( project ),
+				output,
+				treeProvider,
+				extraArgs,
+			} );
+			if ( result?.exitCode === 0 ) {
+				try {
+					const doc = await vscode.workspace.openTextDocument( vscode.Uri.file( form.outputFile ) );
+					await vscode.window.showTextDocument( doc, { preview: true, viewColumn: vscode.ViewColumn.Beside } );
+				} catch {
+					// file may be relative or not yet flushed
+				}
+			}
+		} else {
+			const result = await runCommand( {
+				project,
+				commandTitle: 'Diff',
+				command: 'diff',
+				runner: runnerFactory( project ),
+				output,
+				treeProvider,
+				extraArgs,
+			} );
+			if ( result?.exitCode === 0 ) {
+				DiffPreviewPanel.show( context, result.stdout );
+			}
 		}
 	};
 }

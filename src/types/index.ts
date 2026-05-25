@@ -38,7 +38,8 @@ export type LiquibaseCommand =
 	| 'validate'
 	| 'rollback'
 	| 'generateChangeLog'
-	| 'diff';
+	| 'diff'
+	| 'diffChangelog';
 
 export interface RunnerEvent {
 	type: 'stdout' | 'stderr' | 'exit' | 'error' | 'command';

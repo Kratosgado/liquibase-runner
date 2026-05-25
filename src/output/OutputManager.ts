@@ -46,7 +46,7 @@ export class OutputManager implements vscode.Disposable {
 	}
 
 	show(): void {
-		this.outputChannel.show( true );
+		this.outputChannel.show( false );
 	}
 
 	startCommand( command: string, project: string ): void {

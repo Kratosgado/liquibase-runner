@@ -11,6 +11,15 @@ const COMMAND_NAMES: Record<LiquibaseCommand, string> = {
 	rollback: 'rollback',
 	generateChangeLog: 'generate-changelog',
 	diff: 'diff',
+	diffChangelog: 'diff-changelog',
+};
+
+// Liquibase CLI uses kebab-case flags; map camelCase extra-arg keys accordingly.
+const CLI_KEY_MAP: Record<string, string> = {
+	labels: 'label-filter',
+	contexts: 'context-filter',
+	referenceUrl: 'reference-url',
+	diffChangeLogFile: 'changelog-file',
 };
 
 export class CliStrategy implements IRunStrategy {
@@ -29,6 +38,11 @@ export class CliStrategy implements IRunStrategy {
 			if ( extraArgs?.outputChangeLogFile ) {
 				args.unshift( `--changelog-file=${extraArgs.outputChangeLogFile}` );
 			}
+		} else if ( command === 'diffChangelog' ) {
+			// --changelog-file is the OUTPUT destination for diff-changelog
+			if ( extraArgs?.diffChangeLogFile ) {
+				args.unshift( `--changelog-file=${extraArgs.diffChangeLogFile}` );
+			}
 		} else {
 			args.unshift( `--changelog-file=${this.resolveChangelogPath( project, extraArgs )}` );
 		}
@@ -36,8 +50,9 @@ export class CliStrategy implements IRunStrategy {
 
 		if ( extraArgs ) {
 			for ( const [ key, value ] of Object.entries( extraArgs ) ) {
-				if ( key === 'changelogFile' || key === 'outputChangeLogFile' ) continue;
-				args.push( `--${key}=${value}` );
+				if ( key === 'changelogFile' || key === 'outputChangeLogFile' || key === 'diffChangeLogFile' ) continue;
+				const mappedKey = CLI_KEY_MAP[ key ] ?? key;
+				args.push( `--${mappedKey}=${value}` );
 			}
 		}
 		return args;

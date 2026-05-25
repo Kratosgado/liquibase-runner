@@ -21,6 +21,93 @@ Your project must use one of the following:
 
 Java and the build tool must be installed and accessible from your terminal.
 
+## Setup
+
+### Maven projects
+
+Add the Liquibase Maven plugin to your `pom.xml`. Spring Boot projects using `spring-boot-starter-liquibase` still need the plugin to run commands from this extension:
+
+```xml
+<build>
+  <plugins>
+    <plugin>
+      <groupId>org.liquibase</groupId>
+      <artifactId>liquibase-maven-plugin</artifactId>
+      <version>4.28.0</version>
+      <configuration>
+        <propertyFile>liquibase.properties</propertyFile>
+      </configuration>
+      <dependencies>
+        <!-- Required for PostgreSQL; swap for your driver -->
+        <dependency>
+          <groupId>org.postgresql</groupId>
+          <artifactId>postgresql</artifactId>
+          <version>42.7.3</version>
+        </dependency>
+      </dependencies>
+    </plugin>
+  </plugins>
+</build>
+```
+
+> **Note:** Match the plugin version to the Liquibase version used by your Spring Boot starter. Check the effective BOM version with `mvn dependency:tree | grep liquibase`.
+
+### Gradle projects
+
+Add the plugin to `build.gradle`:
+
+```groovy
+plugins {
+  id 'org.liquibase.gradle' version '2.2.2'
+}
+
+dependencies {
+  liquibaseRuntime 'org.liquibase:liquibase-core:4.28.0'
+  liquibaseRuntime 'org.postgresql:postgresql:42.7.3'
+}
+
+liquibase {
+  activities {
+    main {
+      changeLogFile 'src/main/resources/db/changelog/db.changelog-master.yaml'
+      url           System.getenv('SPRING_DATASOURCE_URL') ?: 'jdbc:postgresql://localhost:5432/mydb'
+      username      System.getenv('SPRING_DATASOURCE_USERNAME') ?: 'postgres'
+      password      System.getenv('SPRING_DATASOURCE_PASSWORD') ?: 'postgres'
+    }
+  }
+}
+```
+
+### `liquibase.properties`
+
+Place this file at the project root. The extension reads it to locate the changelog and database connection:
+
+```properties
+changeLogFile=src/main/resources/db/changelog/db.changelog-master.yaml
+url=jdbc:postgresql://localhost:5432/mydb
+username=postgres
+password=postgres
+driver=org.postgresql.Driver
+
+# Optional — used by diff and diffChangelog commands
+referenceUrl=jdbc:postgresql://localhost:5432/mydb_reference
+referenceUsername=postgres
+referencePassword=postgres
+```
+
+> **Tip:** Avoid committing passwords. Use environment variable placeholders (`${DB_PASSWORD}`) and set them in your shell or a `.env` loader.
+
+### Contexts and labels (Liquibase 4.24+)
+
+Liquibase 4.24 renamed the filter parameters. This extension uses the current names:
+
+| Old name | Current name | Maven property | CLI flag |
+| --- | --- | --- | --- |
+| `contexts` | `contextFilter` | `-Dliquibase.contextFilter` | `--context-filter` |
+| `labels` | `labelFilter` | `-Dliquibase.labelFilter` | `--label-filter` |
+
+If you are on a version older than 4.24, contexts still work but the labels field will have no effect — upgrade the plugin or pass labels via `liquibase.properties`.
+
 ## Getting Started
 
 1. Open a workspace containing a Java project with Liquibase

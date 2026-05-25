@@ -12,6 +12,12 @@ const COMMAND_MAP: Record<LiquibaseCommand, string> = {
 	rollback: 'liquibaseRollback',
 	generateChangeLog: 'liquibaseGenerateChangeLog',
 	diff: 'liquibaseDiff',
+	diffChangelog: 'liquibaseDiffChangelog',
+};
+
+const GRADLE_KEY_MAP: Record<string, string> = {
+	labels: 'labelFilter',
+	contexts: 'contextFilter',
 };
 
 export class GradleStrategy implements IRunStrategy {
@@ -28,10 +34,14 @@ export class GradleStrategy implements IRunStrategy {
 		if ( extraArgs?.outputChangeLogFile ) {
 			args.push( `-PliquibaseOutputChangeLogFile=${extraArgs.outputChangeLogFile}` );
 		}
+		if ( extraArgs?.diffChangeLogFile ) {
+			args.push( `-PliquibaseDiffChangeLogFile=${extraArgs.diffChangeLogFile}` );
+		}
 		if ( extraArgs ) {
 			for ( const [ key, value ] of Object.entries( extraArgs ) ) {
-				if ( key === 'changelogFile' || key === 'outputChangeLogFile' ) continue;
-				args.push( `--${key}=${value}` );
+				if ( key === 'changelogFile' || key === 'outputChangeLogFile' || key === 'diffChangeLogFile' ) continue;
+				const mappedKey = GRADLE_KEY_MAP[ key ] ?? key;
+				args.push( `--${mappedKey}=${value}` );
 			}
 		}
 		return args;
