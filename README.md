@@ -40,10 +40,30 @@ Add the Liquibase Maven plugin to your `pom.xml`. Spring Boot projects using `sp
       <dependencies>
         <!-- Required for PostgreSQL; swap for your driver -->
         <dependency>
-          <groupId>org.postgresql</groupId>
-          <artifactId>postgresql</artifactId>
-          <version>42.7.3</version>
-        </dependency>
+         <groupId>org.liquibase.ext</groupId>
+         <artifactId>liquibase-hibernate6</artifactId>
+          <version>${liquibase.version}</version>
+      </dependency>
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-data-jpa</artifactId>
+        <version>4.0.6</version>
+      </dependency>
+      <dependency>
+        <groupId>jakarta.persistence</groupId>
+        <artifactId>jakarta.persistence-api</artifactId>
+        <version>3.2.0</version>
+      </dependency>
+      <dependency>
+        <groupId>jakarta.validation</groupId>
+        <artifactId>jakarta.validation-api</artifactId>
+        <version>3.1.1</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.logging</groupId>
+        <artifactId>jboss-logging</artifactId>
+        <version>3.6.3.Final</version>
+      </dependency>
       </dependencies>
     </plugin>
   </plugins>

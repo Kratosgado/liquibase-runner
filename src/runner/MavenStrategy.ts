@@ -13,13 +13,15 @@ const COMMAND_MAP: Record<LiquibaseCommand, string> = {
 	generateChangeLog: 'liquibase:generateChangeLog',
 	diff: 'liquibase:diff',
 	diffChangelog: 'liquibase:diff',
+	tag: 'liquibase:tag',
+	tagExists: 'liquibase:tagExists',
+	dropAll: 'liquibase:dropAll',
+	snapshot: 'liquibase:snapshot',
+	unexpectedChangeSets: 'liquibase:unexpectedChangeSets',
 };
 
-// Liquibase 4.24+ renamed these parameters; use the new names for both old+new plugin versions.
-const MAVEN_KEY_MAP: Record<string, string> = {
-	labels: 'labelFilter',
-	contexts: 'contextFilter',
-};
+// Use legacy names (contexts/labels) — accepted by all Liquibase versions including 4.x+.
+const MAVEN_KEY_MAP: Record<string, string> = {};
 
 export class MavenStrategy implements IRunStrategy {
 	buildArgs(

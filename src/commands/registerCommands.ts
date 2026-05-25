@@ -13,6 +13,12 @@ import { createConfigureProjectCommand } from './configureProject.js';
 import { createCommandBuilderCommand } from './commandBuilder.js';
 import { createValidateCommand } from './validateCommand.js';
 import { createGenerateChangelogCommand } from './generateChangelogCommand.js';
+import { createTagCommand } from './tagCommand.js';
+import { createTagExistsCommand } from './tagExistsCommand.js';
+import { createDropAllCommand } from './dropAllCommand.js';
+import { createSnapshotCommand } from './snapshotCommand.js';
+import { createUnexpectedChangeSetsCommand } from './unexpectedChangeSetsCommand.js';
+import { createResetCommand } from './resetCommand.js';
 
 export function registerCommands(
 	context: vscode.ExtensionContext,
@@ -38,6 +44,18 @@ export function registerCommands(
 		createGenerateChangelogCommand( projects, output, runnerFactory, treeProvider, context, connManager ) );
 	reg( 'liquibaseRunner.diff',
 		createDiffCommand( projects, output, runnerFactory, treeProvider, context, connManager ) );
+	reg( 'liquibaseRunner.tag',
+		createTagCommand( projects, output, runnerFactory, treeProvider ) );
+	reg( 'liquibaseRunner.tagExists',
+		createTagExistsCommand( projects, output, runnerFactory, treeProvider ) );
+	reg( 'liquibaseRunner.dropAll',
+		createDropAllCommand( projects, output, runnerFactory, treeProvider ) );
+	reg( 'liquibaseRunner.snapshot',
+		createSnapshotCommand( projects, output, runnerFactory, treeProvider ) );
+	reg( 'liquibaseRunner.unexpectedChangeSets',
+		createUnexpectedChangeSetsCommand( projects, output, runnerFactory, treeProvider ) );
+	reg( 'liquibaseRunner.reset',
+		createResetCommand( projects, output, runnerFactory, treeProvider ) );
 
 	reg( 'liquibaseRunner.configureProject',
 		createConfigureProjectCommand( projects ) );

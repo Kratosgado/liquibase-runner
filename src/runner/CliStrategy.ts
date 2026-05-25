@@ -12,12 +12,16 @@ const COMMAND_NAMES: Record<LiquibaseCommand, string> = {
 	generateChangeLog: 'generate-changelog',
 	diff: 'diff',
 	diffChangelog: 'diff-changelog',
+	tag: 'tag',
+	tagExists: 'tag-exists',
+	dropAll: 'drop-all',
+	snapshot: 'snapshot',
+	unexpectedChangeSets: 'unexpected-changesets',
 };
 
 // Liquibase CLI uses kebab-case flags; map camelCase extra-arg keys accordingly.
+// contexts/labels use legacy names — accepted by all Liquibase versions including 4.x+.
 const CLI_KEY_MAP: Record<string, string> = {
-	labels: 'label-filter',
-	contexts: 'context-filter',
 	referenceUrl: 'reference-url',
 	diffChangeLogFile: 'changelog-file',
 };
@@ -43,7 +47,7 @@ export class CliStrategy implements IRunStrategy {
 			if ( extraArgs?.diffChangeLogFile ) {
 				args.unshift( `--changelog-file=${extraArgs.diffChangeLogFile}` );
 			}
-		} else {
+		} else if ( command !== 'tag' && command !== 'tagExists' && command !== 'dropAll' && command !== 'snapshot' ) {
 			args.unshift( `--changelog-file=${this.resolveChangelogPath( project, extraArgs )}` );
 		}
 		args.unshift( `--defaults-file=${propsPath}` );

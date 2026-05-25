@@ -113,6 +113,36 @@
         "command": "liquibaseRunner.openChangeset",
         "title": "Open File",
         "icon": "$(go-to-file)"
+      },
+      {
+        "command": "liquibaseRunner.tag",
+        "title": "Liquibase: Tag Database",
+        "icon": "$(tag)"
+      },
+      {
+        "command": "liquibaseRunner.tagExists",
+        "title": "Liquibase: Check Tag Exists",
+        "icon": "$(search)"
+      },
+      {
+        "command": "liquibaseRunner.dropAll",
+        "title": "Liquibase: Drop All",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "liquibaseRunner.snapshot",
+        "title": "Liquibase: Snapshot",
+        "icon": "$(save)"
+      },
+      {
+        "command": "liquibaseRunner.unexpectedChangeSets",
+        "title": "Liquibase: Unexpected Changesets",
+        "icon": "$(warning)"
+      },
+      {
+        "command": "liquibaseRunner.reset",
+        "title": "Liquibase: Reset (Drop All + Update)",
+        "icon": "$(sync)"
       }
     ],
     "menus": {
@@ -168,6 +198,36 @@
           "command": "liquibaseRunner.openChangeset",
           "when": "view == liquibaseRunner.projectsView && viewItem == changeset",
           "group": "inline"
+        },
+        {
+          "command": "liquibaseRunner.tag",
+          "when": "view == liquibaseRunner.projectsView && viewItem == project",
+          "group": "1_run@6"
+        },
+        {
+          "command": "liquibaseRunner.tagExists",
+          "when": "view == liquibaseRunner.projectsView && viewItem == project",
+          "group": "1_run@7"
+        },
+        {
+          "command": "liquibaseRunner.unexpectedChangeSets",
+          "when": "view == liquibaseRunner.projectsView && viewItem == project",
+          "group": "1_run@8"
+        },
+        {
+          "command": "liquibaseRunner.snapshot",
+          "when": "view == liquibaseRunner.projectsView && viewItem == project",
+          "group": "2_generate@2"
+        },
+        {
+          "command": "liquibaseRunner.dropAll",
+          "when": "view == liquibaseRunner.projectsView && viewItem == project",
+          "group": "3_danger@1"
+        },
+        {
+          "command": "liquibaseRunner.reset",
+          "when": "view == liquibaseRunner.projectsView && viewItem == project",
+          "group": "3_danger@2"
         }
       ],
       "commandPalette": [
@@ -200,6 +260,24 @@
         },
         {
           "command": "liquibaseRunner.openPanel"
+        },
+        {
+          "command": "liquibaseRunner.tag"
+        },
+        {
+          "command": "liquibaseRunner.tagExists"
+        },
+        {
+          "command": "liquibaseRunner.dropAll"
+        },
+        {
+          "command": "liquibaseRunner.snapshot"
+        },
+        {
+          "command": "liquibaseRunner.unexpectedChangeSets"
+        },
+        {
+          "command": "liquibaseRunner.reset"
         }
       ]
     },

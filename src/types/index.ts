@@ -39,7 +39,12 @@ export type LiquibaseCommand =
 	| 'rollback'
 	| 'generateChangeLog'
 	| 'diff'
-	| 'diffChangelog';
+	| 'diffChangelog'
+	| 'tag'
+	| 'tagExists'
+	| 'dropAll'
+	| 'snapshot'
+	| 'unexpectedChangeSets';
 
 export interface RunnerEvent {
 	type: 'stdout' | 'stderr' | 'exit' | 'error' | 'command';

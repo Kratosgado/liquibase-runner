@@ -1,0 +1,35 @@
+import * as vscode from 'vscode';
+import type { LiquibaseProject } from '../types/index.js';
+import type { CommandRunner } from '../runner/CommandRunner.js';
+import type { OutputManager } from '../output/OutputManager.js';
+import type { LiquibaseTreeProvider } from '../tree/LiquibaseTreeProvider.js';
+import type { LiquibaseTreeNode } from '../tree/LiquibaseNode.js';
+import { pickProject, runCommand } from './shared.js';
+
+export function createDropAllCommand(
+	projects: LiquibaseProject[],
+	output: OutputManager,
+	runnerFactory: ( p: LiquibaseProject ) => CommandRunner,
+	treeProvider: LiquibaseTreeProvider,
+) {
+	return async ( node?: LiquibaseTreeNode ) => {
+		const project = node?.project ?? ( await pickProject( projects ) );
+		if ( !project ) return;
+
+		const confirmed = await vscode.window.showWarningMessage(
+			`Drop ALL database objects in "${project.name}"? This cannot be undone.`,
+			{ modal: true },
+			'Drop All',
+		);
+		if ( confirmed !== 'Drop All' ) return;
+
+		await runCommand( {
+			project,
+			commandTitle: 'Drop All',
+			command: 'dropAll',
+			runner: runnerFactory( project ),
+			output,
+			treeProvider,
+		} );
+	};
+}

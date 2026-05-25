@@ -13,12 +13,15 @@ const COMMAND_MAP: Record<LiquibaseCommand, string> = {
 	generateChangeLog: 'liquibaseGenerateChangeLog',
 	diff: 'liquibaseDiff',
 	diffChangelog: 'liquibaseDiffChangelog',
+	tag: 'liquibaseTag',
+	tagExists: 'liquibaseTagExists',
+	dropAll: 'liquibaseDropAll',
+	snapshot: 'liquibaseSnapshot',
+	unexpectedChangeSets: 'liquibaseUnexpectedChangeSets',
 };
 
-const GRADLE_KEY_MAP: Record<string, string> = {
-	labels: 'labelFilter',
-	contexts: 'contextFilter',
-};
+// Use legacy names (contexts/labels) — accepted by all Liquibase versions including 4.x+.
+const GRADLE_KEY_MAP: Record<string, string> = {};
 
 export class GradleStrategy implements IRunStrategy {
 	buildArgs(
