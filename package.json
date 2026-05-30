@@ -11,7 +11,7 @@
     "name": "Kratosgado",
     "url": "https://github.com/kratosgado"
   },
-  "version": "0.0.1",
+  "version": "0.0.2",
   "icon": "resources/liquibase.png",
   "engines": {
     "vscode": "^1.120.0"
@@ -21,18 +21,6 @@
   ],
   "activationEvents": [
     "onStartupFinished",
-    "onView:liquibaseRunner.projectsView",
-    "onCommand:liquibaseRunner.update",
-    "onCommand:liquibaseRunner.status",
-    "onCommand:liquibaseRunner.validate",
-    "onCommand:liquibaseRunner.rollback",
-    "onCommand:liquibaseRunner.generateChangelog",
-    "onCommand:liquibaseRunner.configureProject",
-    "onCommand:liquibaseRunner.commandBuilder",
-    "onCommand:liquibaseRunner.diff",
-    "onCommand:liquibaseRunner.refresh",
-    "onCommand:liquibaseRunner.openPanel",
-    "onCommand:liquibaseRunner.openChangeset",
     "workspaceContains:**/liquibase.properties",
     "workspaceContains:**/db.changelog-master.yaml",
     "workspaceContains:**/db.changelog-master.xml"
